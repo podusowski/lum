@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(lum CXX)
-
-find_package(Catch2 3 REQUIRED)
+set(CMAKE_CXX_STANDARD 14)
+find_package(Catch2)
 add_executable(tests tests/test.cpp)
-target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
+target_link_libraries(tests Catch2::Catch2)
