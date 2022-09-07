@@ -1,13 +1,17 @@
-#include <catch2/catch_test_macros.hpp>
 #include <mutex>
+#include <stdexcept>
 #include <thread>
+
+#define REQUIRE(expr)                                                          \
+  if (!(expr))                                                                 \
+    throw std::runtime_error(#expr);
 
 void increment(int &value, std::mutex &m) {
   std::unique_lock<std::mutex> guard{m};
   value++;
 }
 
-TEST_CASE("test") {
+void test() {
   int value{0};
   std::mutex m;
   std::thread t{increment, std::ref(value), std::ref(m)};
@@ -19,3 +23,5 @@ TEST_CASE("test") {
 
   t.join();
 }
+
+int main() { test(); }

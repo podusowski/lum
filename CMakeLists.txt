@@ -5,4 +5,3 @@ set(CMAKE_CXX_STANDARD 17)
 add_subdirectory(external/Catch2)
 
 add_executable(tests tests/test.cpp)
-target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
