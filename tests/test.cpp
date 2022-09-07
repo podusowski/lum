@@ -7,18 +7,18 @@
   if (!(expr))                                                                 \
     throw std::runtime_error(#expr);
 
-void increment(int &value, std::mutex &m) {
-  std::unique_lock<std::mutex> guard{m};
+void increment(int &value, lum::mutex &m) {
+  std::unique_lock<lum::mutex> guard{m};
   value++;
 }
 
 void test() {
   int value{0};
-  std::mutex m;
+  lum::mutex m;
   std::thread t{increment, std::ref(value), std::ref(m)};
 
   {
-    std::unique_lock<std::mutex> guard{m};
+    std::unique_lock<lum::mutex> guard{m};
     REQUIRE(0 == value);
   }
 
