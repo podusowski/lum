@@ -1,7 +1,7 @@
+#include "lum/lum.hpp"
 #include <mutex>
 #include <stdexcept>
 #include <thread>
-#include "lum/lum.hpp"
 
 #define REQUIRE(expr)                                                          \
   if (!(expr))                                                                 \
@@ -12,9 +12,9 @@ void increment(int &value, lum::mutex &m) {
   value++;
 }
 
-void test() {
+void test(lum::mutator &mutator) {
   int value{0};
-  lum::mutex m;
+  lum::mutex m{mutator};
   std::thread t{increment, std::ref(value), std::ref(m)};
 
   {
@@ -25,4 +25,16 @@ void test() {
   t.join();
 }
 
-int main() { test(); }
+int main() {
+  lum::mutator mutator;
+
+  std::cerr << "characterization pass" << std::endl;
+  test(mutator);
+  mutator.characterizing = false;
+
+  for (auto i = 0; i < 10; i++) {
+    std::cerr << "iteration has started" << std::endl;
+    test(mutator);
+    std::cerr << std::endl;
+  }
+}
