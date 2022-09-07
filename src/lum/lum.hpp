@@ -15,8 +15,6 @@
 namespace lum {
 
 struct mutator {
-  std::size_t acquire_id();
-
   void record_mutex_lock() {
     const auto id = std::this_thread::get_id();
     _threads.push_back(id);
@@ -63,8 +61,6 @@ struct mutator {
   }
 
 private:
-  std::size_t _id;
-
   // Order recorded on characterization pass.
   std::vector<std::thread::id> _threads;
 
