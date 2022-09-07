@@ -11,6 +11,11 @@ TEST_CASE("test") {
   int value{0};
   std::mutex m;
   std::thread t{increment, std::ref(value), std::ref(m)};
-  REQUIRE(1 == value);
+
+  {
+    std::unique_lock<std::mutex> guard{m};
+    REQUIRE(0 == value);
+  }
+
   t.join();
 }
