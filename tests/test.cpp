@@ -19,7 +19,8 @@ void test(lum::mutator &mutator) {
 
   {
     std::unique_lock<lum::mutex> guard{m};
-    REQUIRE(0 == value);
+    //REQUIRE(0 == value);
+    std::cerr << "value: " << value << std::endl;
   }
 
   t.join();
@@ -30,9 +31,11 @@ int main() {
 
   std::cerr << "characterization pass" << std::endl;
   test(mutator);
-  mutator.characterizing = false;
+  mutator.mutation_pass();
+  std::cerr << std::endl;
 
   for (auto i = 0; i < 10; i++) {
+    mutator.next();
     std::cerr << "iteration has started" << std::endl;
     test(mutator);
     std::cerr << std::endl;
