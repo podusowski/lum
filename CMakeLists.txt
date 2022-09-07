@@ -3,5 +3,7 @@ project(lum CXX)
 set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(external/Catch2)
+add_subdirectory(src)
 
 add_executable(tests tests/test.cpp)
+target_link_libraries(tests lum)

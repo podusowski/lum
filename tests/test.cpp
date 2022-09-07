@@ -1,6 +1,7 @@
 #include <mutex>
 #include <stdexcept>
 #include <thread>
+#include "lum/lum.hpp"
 
 #define REQUIRE(expr)                                                          \
   if (!(expr))                                                                 \
