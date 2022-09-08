@@ -5,6 +5,7 @@
 #include <condition_variable>
 #include <cstddef>
 #include <future>
+#include <ios>
 #include <iostream>
 #include <iterator>
 #include <mutex>
@@ -30,16 +31,23 @@ struct mutator {
   void wait() {
     if (characterizing) {
       _threads.push_back(std::this_thread::get_id());
+      std::cerr << "characterization phase, skipping waiting" << std::endl;
       return;
     }
 
     // Wait until our thread is free to acquire the lock.
     std::unique_lock<std::mutex> lock{expected_thread.mutex};
     assert(expected_thread.it < _permutation.end());
-    expected_thread.cond.wait(
-        lock, [this]() { return expected_thread.is_current(); });
+    expected_thread.cond.wait(lock, [this]() {
+      const auto its_turn = expected_thread.is_current();
+      std::cerr << std::this_thread::get_id()
+                << " woken up, is it its turn: " << std::boolalpha << its_turn
+                << std::endl;
+      return its_turn;
+    });
 
     // Update internals for the next call.
+    std::cerr <<  "moving to next thread" << std::endl;
     expected_thread.it++;
     expected_thread.cond.notify_all();
   }
@@ -83,13 +91,14 @@ struct mutex {
 
   void lock() {
     _mutator.wait();
+    std::cerr << std::this_thread::get_id() << " trying to lock" << std::endl;
     _real.lock();
-    std::cerr << std::this_thread::get_id() << " locks" << std::endl;
+    std::cerr << std::this_thread::get_id() << " locked" << std::endl;
   }
 
   void unlock() {
     _real.unlock();
-    // std::cerr << std::this_thread::get_id() << " unlocks" << std::endl;
+    std::cerr << std::this_thread::get_id() << " unlocked" << std::endl;
   }
 
 private:
