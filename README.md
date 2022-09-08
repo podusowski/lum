@@ -38,7 +38,9 @@ value: 42
 
 It still doesn't work as expected. The behavior is not deterministic, because there is no way to tell which thread will acquire the mutex first. Sometimes it's acquired by the writer and we get `42`, but sometimes the variable id read by the main thread, resulting with still default value of `0`.
 
-`lum` lets you write tests which will use different combinations of whom gets the lock first.
+`lum` lets you write tests which will use different combinations of whom gets the lock first. In above example, test would run two times (though there is a small caveat here). In the first iteration, "calculating thread" will get the lock first, in the second iteration, the "reading thread" will get it first. Both will happen in a deterministic way.
+
+The [test version](tests/test.cpp) of the above problem explicitly requires that both possibilities occurs.
 
 
 Cheat sheet
