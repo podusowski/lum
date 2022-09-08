@@ -1,17 +1,20 @@
 #pragma once
 
+#include <iomanip>
 #include <iostream>
 #include <mutex>
+#include <thread>
 
 namespace lum {
 
 struct trace {
+  trace() { std::cerr << "thread:" << std::this_thread::get_id() << ": "; }
+  ~trace() { std::cerr << std::endl; }
+
   template <class T> trace &operator<<(T &&t) {
     std::cerr << t;
     return *this;
   }
-
-  ~trace() { std::cerr << std::endl; }
 
 private:
   inline static std::mutex _mutex;
