@@ -8,7 +8,7 @@ What does it do?
 ----------------
 There are various thread sanitizers which check whether your structures are synchronized, `lum` check your concurrent algorithms logic. Pretty vague, I know, let's see some examples.
 
-Consider [following code](cases/nosync.cpp). Program has two threads. One (commented as supplementary) writes a value, second one (main thread) reads it. Is this program correct? Well, no. Writes and reads aren't synchronized. In fact, we can even see a data rate in ThreadSanitizer:
+Consider [following code](cases/nosync.cpp). Program has two threads. One (commented as supplementary) writes a value, second one (main thread) reads it. Is this program correct? Well, no. Writes and reads aren't synchronized. In fact, we can even see a data race in ThreadSanitizer:
 
 ``` 
 WARNING: ThreadSanitizer: data race (pid=20480)
@@ -36,7 +36,7 @@ value: 42
 value: 42
 ```
 
-It still doesn't work as expected because it's not deterministic which thread will first acquire the mutex.
+It still doesn't work as expected. The behavior is not deterministic, because there is no way to tell which thread will acquire the mutex first. Sometimes it's acquired by the writer and we get `42`, but sometimes the variable id read by the main thread, resulting with still default value of `0`.
 
 `lum` lets you write tests which will use different combinations of whom gets the lock first.
 
