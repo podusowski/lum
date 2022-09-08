@@ -47,8 +47,12 @@ struct mutator {
                     << its_turn;
       return its_turn;
     });
+  }
 
-    // Update internals for the next call.
+  void unlock() {
+    if (characterizing)
+      return;
+    std::unique_lock<std::mutex> lock{expected_thread.mutex};
     synced_cerr{} << "moving to next thread";
     expected_thread.it++;
     expected_thread.cond.notify_all();
@@ -99,6 +103,7 @@ struct mutex {
   }
 
   void unlock() {
+    _mutator.unlock();
     _real.unlock();
     synced_cerr{} << std::this_thread::get_id() << " unlocked";
   }
