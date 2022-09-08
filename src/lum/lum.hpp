@@ -15,24 +15,24 @@
 namespace lum {
 
 struct mutator {
-  void record_mutex_lock() {
-    const auto id = std::this_thread::get_id();
-    _threads.push_back(id);
-  }
-
   /// Initialize next pass.
   void next() {
     std::next_permutation(std::begin(_permutation), std::end(_permutation));
     expected_thread.it = std::begin(_permutation);
 
     std::cerr << "next permutation: ";
-    for (const auto id: _permutation) {
+    for (const auto id : _permutation) {
       std::cerr << id << " ";
     }
     std::cerr << std::endl;
   }
 
   void wait() {
+    if (characterizing) {
+      _threads.push_back(std::this_thread::get_id());
+      return;
+    }
+
     // Wait until our thread is free to acquire the lock.
     std::unique_lock<std::mutex> lock{expected_thread.mutex};
     assert(expected_thread.it < _permutation.end());
@@ -82,18 +82,14 @@ struct mutex {
   mutex(mutator &mut) : _mutator(mut) {}
 
   void lock() {
-    if (_mutator.characterizing)
-      _mutator.record_mutex_lock();
-    else
-      _mutator.wait();
-
+    _mutator.wait();
     _real.lock();
     std::cerr << std::this_thread::get_id() << " locks" << std::endl;
   }
 
   void unlock() {
     _real.unlock();
-    //std::cerr << std::this_thread::get_id() << " unlocks" << std::endl;
+    // std::cerr << std::this_thread::get_id() << " unlocks" << std::endl;
   }
 
 private:
