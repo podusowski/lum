@@ -42,7 +42,5 @@ int main() {
     std::cerr << std::endl;
   }
 
-  for (auto i : values)
-    std::cerr << i << std::endl;
   assert((values == std::set<int>{0, 42}));
 }
