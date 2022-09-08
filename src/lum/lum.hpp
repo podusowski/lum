@@ -21,7 +21,7 @@ struct mutator {
   /// Initialize next pass.
   void next() {
     std::next_permutation(std::begin(_permutation), std::end(_permutation));
-    expected_thread.it = std::begin(_permutation);
+    _next.id = std::begin(_permutation);
 
     synced_cerr{} << "next permutation: ";
     for (const auto id : _permutation) {
@@ -38,10 +38,10 @@ struct mutator {
     }
 
     // Wait until our thread is free to acquire the lock.
-    std::unique_lock<std::mutex> lock{expected_thread.mutex};
-    assert(expected_thread.it < _permutation.end());
-    expected_thread.cond.wait(lock, [this]() {
-      const auto its_turn = expected_thread.is_current();
+    std::unique_lock<std::mutex> lock{_next.m};
+    assert(_next.id < _permutation.end());
+    _next.cv.wait(lock, [this]() {
+      const auto its_turn = _next.allowed();
       synced_cerr{} << std::this_thread::get_id()
                     << " woken up, is it its turn: " << std::boolalpha
                     << its_turn;
@@ -52,10 +52,10 @@ struct mutator {
   void unlock() {
     if (characterizing)
       return;
-    std::unique_lock<std::mutex> lock{expected_thread.mutex};
-    synced_cerr{} << "moving to next thread";
-    expected_thread.it++;
-    expected_thread.cond.notify_all();
+    std::unique_lock<std::mutex> lock{_next.m};
+    synced_cerr{} << "moving to the next thread";
+    _next.id++;
+    _next.cv.notify_all();
   }
 
   // Start the mutation pass.
@@ -63,9 +63,6 @@ struct mutator {
     characterizing = false;
     _permutation = _threads;
   }
-
-  // Just record order in which threads locks particular mutex.
-  bool characterizing = true;
 
   ~mutator() {
     synced_cerr{} << "recorded locking profile:";
@@ -75,21 +72,23 @@ struct mutator {
   }
 
 private:
+  // Just record the order in which threads locks the mutex.
+  bool characterizing = true;
+
   // Order recorded on characterization pass.
   std::vector<std::thread::id> _threads;
 
   // Permutation of the characterized order for the current pass.
   std::vector<std::thread::id> _permutation;
 
-  // Threads that aren't expected to acquire the lock, will wait for this
-  // future.
+  // Thread allowed to acquire the next lock.
   struct {
-    bool is_current() const { return std::this_thread::get_id() == *it; }
+    bool allowed() const { return std::this_thread::get_id() == *id; }
 
-    std::mutex mutex;
-    std::condition_variable cond;
-    std::vector<std::thread::id>::iterator it;
-  } expected_thread;
+    std::mutex m;
+    std::condition_variable cv;
+    std::vector<std::thread::id>::iterator id;
+  } _next;
 };
 
 struct mutex {
