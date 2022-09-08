@@ -6,13 +6,13 @@ int main() {
   int value{0};
   std::mutex mutex;
 
-  // Supplementary thread.
+  // Calculate something in the background.
   std::thread t{[&] {
     std::unique_lock<std::mutex> lock{mutex};
     value = 42;
   }};
 
-  // Main thread.
+  // Use the calculated value.
   {
     std::unique_lock<std::mutex> lock{mutex};
     std::cerr << "value: " << value << std::endl; // 0 or 42?
