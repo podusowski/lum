@@ -6,11 +6,8 @@
 #include <cassert>
 #include <condition_variable>
 #include <future>
-#include <ios>
 #include <iostream>
-#include <iterator>
 #include <mutex>
-#include <queue>
 #include <thread>
 #include <vector>
 
