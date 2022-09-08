@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <cassert>
 #include <condition_variable>
-#include <cstddef>
 #include <future>
 #include <ios>
 #include <iostream>
@@ -23,9 +22,9 @@ struct mutator {
     std::next_permutation(std::begin(_permutation), std::end(_permutation));
     _next.id = std::begin(_permutation);
 
-    trace{} << "next permutation: ";
+    trace{} << "next permutation:";
     for (const auto id : _permutation) {
-      trace{} << id << " ";
+      trace{} << "  " << id;
     }
     trace{};
   }
@@ -42,8 +41,7 @@ struct mutator {
     assert(_next.id < _permutation.end());
     _next.cv.wait(lock, [this]() {
       const auto its_turn = _next.allowed();
-      trace{} << std::this_thread::get_id()
-              << " woken up, is it its turn: " << std::boolalpha << its_turn;
+      trace{} << "woken up, is it its turn: " << std::boolalpha << its_turn;
       return its_turn;
     });
   }
@@ -95,15 +93,15 @@ struct mutex {
 
   void lock() {
     _mutator.wait();
-    trace{} << std::this_thread::get_id() << " trying to lock";
+    trace{} << "trying to lock";
     _real.lock();
-    trace{} << std::this_thread::get_id() << " locked";
+    trace{} << "locked";
   }
 
   void unlock() {
     _mutator.unlock();
     _real.unlock();
-    trace{} << std::this_thread::get_id() << " unlocked";
+    trace{} << "unlocked";
   }
 
 private:
