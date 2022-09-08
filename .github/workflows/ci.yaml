@@ -4,11 +4,13 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - name: install dependencies
+      - name: dependencies
         run: |
           sudo apt-get update
           sudo apt-get install --yes ninja-build g++ python3 pip
-      - name: configure cmake
-        run: cmake -B ${{github.workspace}}/build -GNinja
       - name: build
-        run: cmake --build ${{github.workspace}}/build
+        run: |
+          cmake -B ./build -GNinja
+          cmake --build ./build
+      - name: run
+        run: ./build/tests
