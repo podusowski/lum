@@ -1,5 +1,7 @@
 #pragma once
 
+#include "log.hpp"
+
 #include <algorithm>
 #include <cassert>
 #include <condition_variable>
@@ -21,17 +23,17 @@ struct mutator {
     std::next_permutation(std::begin(_permutation), std::end(_permutation));
     expected_thread.it = std::begin(_permutation);
 
-    std::cerr << "next permutation: ";
+    synced_cerr{} << "next permutation: ";
     for (const auto id : _permutation) {
-      std::cerr << id << " ";
+      synced_cerr{} << id << " ";
     }
-    std::cerr << std::endl;
+    synced_cerr{};
   }
 
   void wait() {
     if (characterizing) {
       _threads.push_back(std::this_thread::get_id());
-      std::cerr << "characterization phase, skipping waiting" << std::endl;
+      synced_cerr{} << "characterization phase, skipping waiting";
       return;
     }
 
@@ -40,14 +42,14 @@ struct mutator {
     assert(expected_thread.it < _permutation.end());
     expected_thread.cond.wait(lock, [this]() {
       const auto its_turn = expected_thread.is_current();
-      std::cerr << std::this_thread::get_id()
-                << " woken up, is it its turn: " << std::boolalpha << its_turn
-                << std::endl;
+      synced_cerr{} << std::this_thread::get_id()
+                    << " woken up, is it its turn: " << std::boolalpha
+                    << its_turn;
       return its_turn;
     });
 
     // Update internals for the next call.
-    std::cerr <<  "moving to next thread" << std::endl;
+    synced_cerr{} << "moving to next thread";
     expected_thread.it++;
     expected_thread.cond.notify_all();
   }
@@ -62,9 +64,9 @@ struct mutator {
   bool characterizing = true;
 
   ~mutator() {
-    std::cerr << "recorded locking profile:" << std::endl;
+    synced_cerr{} << "recorded locking profile:";
     for (auto id : _threads) {
-      std::cerr << "locked by " << id << std::endl;
+      synced_cerr{} << "locked by " << id;
     }
   }
 
@@ -91,14 +93,14 @@ struct mutex {
 
   void lock() {
     _mutator.wait();
-    std::cerr << std::this_thread::get_id() << " trying to lock" << std::endl;
+    synced_cerr{} << std::this_thread::get_id() << " trying to lock";
     _real.lock();
-    std::cerr << std::this_thread::get_id() << " locked" << std::endl;
+    synced_cerr{} << std::this_thread::get_id() << " locked";
   }
 
   void unlock() {
     _real.unlock();
-    std::cerr << std::this_thread::get_id() << " unlocked" << std::endl;
+    synced_cerr{} << std::this_thread::get_id() << " unlocked";
   }
 
 private:
