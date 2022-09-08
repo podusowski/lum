@@ -23,17 +23,17 @@ struct mutator {
     std::next_permutation(std::begin(_permutation), std::end(_permutation));
     _next.id = std::begin(_permutation);
 
-    synced_cerr{} << "next permutation: ";
+    trace{} << "next permutation: ";
     for (const auto id : _permutation) {
-      synced_cerr{} << id << " ";
+      trace{} << id << " ";
     }
-    synced_cerr{};
+    trace{};
   }
 
   void wait() {
     if (characterizing) {
       _threads.push_back(std::this_thread::get_id());
-      synced_cerr{} << "characterization phase, skipping waiting";
+      trace{} << "characterization phase, skipping waiting";
       return;
     }
 
@@ -42,9 +42,8 @@ struct mutator {
     assert(_next.id < _permutation.end());
     _next.cv.wait(lock, [this]() {
       const auto its_turn = _next.allowed();
-      synced_cerr{} << std::this_thread::get_id()
-                    << " woken up, is it its turn: " << std::boolalpha
-                    << its_turn;
+      trace{} << std::this_thread::get_id()
+              << " woken up, is it its turn: " << std::boolalpha << its_turn;
       return its_turn;
     });
   }
@@ -53,7 +52,7 @@ struct mutator {
     if (characterizing)
       return;
     std::unique_lock<std::mutex> lock{_next.m};
-    synced_cerr{} << "moving to the next thread";
+    trace{} << "moving to the next thread";
     _next.id++;
     _next.cv.notify_all();
   }
@@ -65,9 +64,9 @@ struct mutator {
   }
 
   ~mutator() {
-    synced_cerr{} << "recorded locking profile:";
+    trace{} << "recorded locking profile:";
     for (auto id : _threads) {
-      synced_cerr{} << "locked by " << id;
+      trace{} << "locked by " << id;
     }
   }
 
@@ -96,15 +95,15 @@ struct mutex {
 
   void lock() {
     _mutator.wait();
-    synced_cerr{} << std::this_thread::get_id() << " trying to lock";
+    trace{} << std::this_thread::get_id() << " trying to lock";
     _real.lock();
-    synced_cerr{} << std::this_thread::get_id() << " locked";
+    trace{} << std::this_thread::get_id() << " locked";
   }
 
   void unlock() {
     _mutator.unlock();
     _real.unlock();
-    synced_cerr{} << std::this_thread::get_id() << " unlocked";
+    trace{} << std::this_thread::get_id() << " unlocked";
   }
 
 private:

@@ -5,13 +5,13 @@
 
 namespace lum {
 
-struct synced_cerr {
-  template <class T> synced_cerr &operator<<(T &&t) {
+struct trace {
+  template <class T> trace &operator<<(T &&t) {
     std::cerr << t;
     return *this;
   }
 
-  ~synced_cerr() { std::cerr << std::endl; }
+  ~trace() { std::cerr << std::endl; }
 
 private:
   inline static std::mutex _mutex;
