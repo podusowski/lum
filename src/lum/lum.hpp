@@ -28,13 +28,9 @@ struct mutator {
     std::next_permutation(std::begin(permutation), std::end(permutation));
     _next.id = std::begin(permutation);
 
-    log::trace{} << "next permutation prepared:";
-    for (const auto id : permutation) {
-      log::trace{} << "  " << id;
-    }
-    log::trace{};
+    log::trace{} << "next permutation: " << log::range(permutation) << "\n";
 
-    log::trace{} << "is same: " << std::boolalpha << (permutation == recorded);
+    // Whether we haven't yet reached the point where we started.
     return !(permutation == recorded);
   }
 
@@ -66,10 +62,7 @@ struct mutator {
   }
 
   ~mutator() {
-    log::trace{} << "recorded locking profile:";
-    for (auto id : recorded) {
-      log::trace{} << "locked by " << id;
-    }
+    log::trace{} << "recorded locking profile: " << log::range(recorded);
   }
 
 private:
@@ -81,10 +74,7 @@ private:
     permutation = recorded;
 
     log::trace{} << "characterization done, " << recorded.size()
-                 << " locks recorded:";
-    for (const auto id : permutation) {
-      log::trace{} << "  " << id;
-    }
+                 << " locks recorded: " << log::range(permutation);
   }
 
   // Just record the order in which threads locks the mutex.
