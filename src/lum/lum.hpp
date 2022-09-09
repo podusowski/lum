@@ -28,20 +28,20 @@ struct mutator {
     std::next_permutation(std::begin(permutation), std::end(permutation));
     _next.id = std::begin(permutation);
 
-    trace{} << "next permutation prepared:";
+    log::trace{} << "next permutation prepared:";
     for (const auto id : permutation) {
-      trace{} << "  " << id;
+      log::trace{} << "  " << id;
     }
-    trace{};
+    log::trace{};
 
-    trace{} << "is same: " << std::boolalpha << (permutation == recorded);
+    log::trace{} << "is same: " << std::boolalpha << (permutation == recorded);
     return !(permutation == recorded);
   }
 
   void wait() {
     if (characterizing) {
       recorded.push_back(std::this_thread::get_id());
-      trace{} << "characterization phase, skipping waiting";
+      log::trace{} << "characterization phase, skipping waiting";
       return;
     }
 
@@ -50,7 +50,8 @@ struct mutator {
     assert(_next.id < permutation.end());
     _next.cv.wait(lock, [this]() {
       const auto its_turn = _next.allowed();
-      trace{} << "woken up, is it its turn: " << std::boolalpha << its_turn;
+      log::trace{} << "woken up, is it its turn: " << std::boolalpha
+                   << its_turn;
       return its_turn;
     });
   }
@@ -59,15 +60,15 @@ struct mutator {
     if (characterizing)
       return;
     std::unique_lock<std::mutex> lock{_next.m};
-    trace{} << "moving to the next thread";
+    log::trace{} << "moving to the next thread";
     _next.id++;
     _next.cv.notify_all();
   }
 
   ~mutator() {
-    trace{} << "recorded locking profile:";
+    log::trace{} << "recorded locking profile:";
     for (auto id : recorded) {
-      trace{} << "locked by " << id;
+      log::trace{} << "locked by " << id;
     }
   }
 
@@ -79,10 +80,10 @@ private:
     characterizing = false;
     permutation = recorded;
 
-    trace{} << "characterization done, " << recorded.size()
-            << " locks recorded:";
+    log::trace{} << "characterization done, " << recorded.size()
+                 << " locks recorded:";
     for (const auto id : permutation) {
-      trace{} << "  " << id;
+      log::trace{} << "  " << id;
     }
   }
 
@@ -110,15 +111,15 @@ struct mutex {
 
   void lock() {
     _mutator.wait();
-    trace{} << "trying to lock";
+    log::trace{} << "trying to lock";
     _real.lock();
-    trace{} << "locked";
+    log::trace{} << "locked";
   }
 
   void unlock() {
     _mutator.unlock();
     _real.unlock();
-    trace{} << "unlocked";
+    log::trace{} << "unlocked";
   }
 
 private:

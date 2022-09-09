@@ -6,7 +6,7 @@
 #include <mutex>
 #include <thread>
 
-namespace lum {
+namespace lum::log {
 
 struct trace {
   trace() : enabled(std::getenv("LUM_TRACE") != nullptr) {
@@ -31,4 +31,4 @@ private:
   std::unique_lock<std::mutex> _lock{_mutex};
 };
 
-} // namespace lum
+} // namespace lum::log
