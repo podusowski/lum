@@ -18,7 +18,7 @@ void test(lum::mutator &mutator, std::set<int> &values) {
 
   {
     std::unique_lock<lum::mutex> lock{m};
-    std::cerr << "value: " << value << std::endl; // Will it be 0 or 1?
+    std::cerr << "value: " << value << std::endl;
     values.insert(value);
   }
 
