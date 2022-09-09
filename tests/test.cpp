@@ -29,16 +29,11 @@ int main() {
   lum::mutator mutator;
   std::set<int> values;
 
-  std::cerr << "characterization pass" << std::endl;
-  test(mutator, values);
-  mutator.next();
-  std::cerr << std::endl;
-
   for (auto i = 0; i < 10; i++) {
-    mutator.next();
     std::cerr << "iteration has started" << std::endl;
     test(mutator, values);
     std::cerr << std::endl;
+    mutator.next();
   }
 
   assert((values == std::set<int>{0, 42}));
