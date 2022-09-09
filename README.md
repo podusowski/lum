@@ -40,7 +40,7 @@ The behavior is not deterministic because there is no way to tell which thread w
 
 `lum` lets you write tests which will use different combinations of whom gets the lock first. In above example, test would run two times (though there is a small caveat here). In the first iteration, "calculating thread" will get the lock first, in the second iteration, the "reading thread" will get it first. Both will happen in a deterministic way.
 
-The [test version](tests/test.cpp) of the above problem explicitly requires that both possibilities occurs. If we run it, in fact we will see both cases, always:
+The [test version](tests/test.cpp) behaves kind of like a Schrödinger's' cat, taking both probability paths at once. If we run it, in fact we will see both cases:
 
 ```
 value: 0
