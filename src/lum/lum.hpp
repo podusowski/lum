@@ -26,7 +26,7 @@ struct mutator {
     //  1. characterization pass: A locks, B locks
     //  2. mutation pass: B locks, A locks
     std::next_permutation(std::begin(permutation), std::end(permutation));
-    _next.id = std::begin(permutation);
+    next_thread.id = std::begin(permutation);
 
     log::trace{} << "next permutation: " << log::range(permutation) << "\n";
 
@@ -42,10 +42,10 @@ struct mutator {
     }
 
     // Wait until our thread is free to acquire the lock.
-    std::unique_lock<std::mutex> lock{_next.m};
-    assert(_next.id < permutation.end());
-    _next.cv.wait(lock, [this]() {
-      const auto its_turn = _next.allowed();
+    std::unique_lock<std::mutex> lock{next_thread.m};
+    assert(next_thread.id < permutation.end());
+    next_thread.cv.wait(lock, [this]() {
+      const auto its_turn = next_thread.allowed();
       log::trace{} << "woken up, is it its turn: " << std::boolalpha
                    << its_turn;
       return its_turn;
@@ -55,10 +55,10 @@ struct mutator {
   void unlock() {
     if (characterizing)
       return;
-    std::unique_lock<std::mutex> lock{_next.m};
+    std::unique_lock<std::mutex> lock{next_thread.m};
     log::trace{} << "moving to the next thread";
-    _next.id++;
-    _next.cv.notify_all();
+    next_thread.id++;
+    next_thread.cv.notify_all();
   }
 
   ~mutator() {
@@ -93,7 +93,7 @@ private:
     std::mutex m;
     std::condition_variable cv;
     std::vector<std::thread::id>::iterator id;
-  } _next;
+  } next_thread;
 };
 
 struct mutex {
