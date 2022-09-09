@@ -50,6 +50,11 @@ Limitations and future plans
 - It's VERY intrusive right now. Not only you have to swap `std::mutex` with `lum::mutex`, but it also has additional constructor parameter. There are couple of ways to solve it though.
 
 
+Enabling logging
+----------------
+To enable `lum`'s internal debug prints, define a `LUM_TRACE` environment variable. Its value doesn't matter.
+
+
 Cheat sheet
 -----------
 Building with clang's ThreadSanitizer:
