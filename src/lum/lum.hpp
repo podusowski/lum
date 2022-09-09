@@ -15,7 +15,8 @@
 namespace lum {
 
 struct mutator {
-  // Initialize next pass.
+  // Initialize next pass. Returns `true` as long as next pass hasn't been used
+  // yet.
   bool next() {
     try_finishing_characterization_pass();
 
