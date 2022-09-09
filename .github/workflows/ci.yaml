@@ -1,4 +1,8 @@
 on: push
+
+env:
+  LUM_TRACE: yes please, gimme all!
+
 jobs:
   build:
     runs-on: ubuntu-22.04
