@@ -12,13 +12,12 @@ void test(lum::mutator &mutator, std::set<int> &values) {
 
   std::thread t{[&] {
     std::unique_lock<lum::mutex> lock{mutex};
-    lum::trace{} << "writing new value";
     value = 42;
   }};
 
   {
     std::unique_lock<lum::mutex> lock{mutex};
-    lum::trace{} << "value: " << value;
+    std::cerr << "value: " << value << std::endl;
     values.insert(value);
   }
 
@@ -31,9 +30,7 @@ int main() {
   std::set<int> values;
 
   do {
-    lum::trace{} << "iteration has started";
     test(mutator, values);
-    lum::trace{};
   } while (mutator.next());
 
   assert((values == std::set<int>{0, 42}));
