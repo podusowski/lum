@@ -32,7 +32,7 @@ int main() {
 
   std::cerr << "characterization pass" << std::endl;
   test(mutator, values);
-  mutator.mutation_pass();
+  mutator.next();
   std::cerr << std::endl;
 
   for (auto i = 0; i < 10; i++) {

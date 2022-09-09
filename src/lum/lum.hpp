@@ -14,13 +14,20 @@
 namespace lum {
 
 struct mutator {
-  /// Initialize next pass.
+  // Initialize next pass.
   void next() {
-    std::next_permutation(std::begin(_permutation), std::end(_permutation));
-    _next.id = std::begin(_permutation);
+    try_finishing_characterization_pass();
+
+    // Note that when characterizing phase have just ended, this will
+    // immediately switch to the next permutation. This means that for two locks
+    // we only need two passes, e.g.:
+    //  1. characterization pass: A locks, B locks
+    //  2. mutation pass: B locks, A locks
+    std::next_permutation(std::begin(permutation), std::end(permutation));
+    _next.id = std::begin(permutation);
 
     trace{} << "next permutation:";
-    for (const auto id : _permutation) {
+    for (const auto id : permutation) {
       trace{} << "  " << id;
     }
     trace{};
@@ -28,14 +35,14 @@ struct mutator {
 
   void wait() {
     if (characterizing) {
-      _threads.push_back(std::this_thread::get_id());
+      recorded.push_back(std::this_thread::get_id());
       trace{} << "characterization phase, skipping waiting";
       return;
     }
 
     // Wait until our thread is free to acquire the lock.
     std::unique_lock<std::mutex> lock{_next.m};
-    assert(_next.id < _permutation.end());
+    assert(_next.id < permutation.end());
     _next.cv.wait(lock, [this]() {
       const auto its_turn = _next.allowed();
       trace{} << "woken up, is it its turn: " << std::boolalpha << its_turn;
@@ -52,28 +59,32 @@ struct mutator {
     _next.cv.notify_all();
   }
 
-  // Start the mutation pass.
-  void mutation_pass() {
-    characterizing = false;
-    _permutation = _threads;
-  }
-
   ~mutator() {
     trace{} << "recorded locking profile:";
-    for (auto id : _threads) {
+    for (auto id : recorded) {
       trace{} << "locked by " << id;
     }
   }
 
 private:
+  void try_finishing_characterization_pass() {
+    if (!characterizing)
+      return;
+
+    characterizing = false;
+    permutation = recorded;
+    trace{} << "characterization done, " << recorded.size()
+            << " locks recorded.";
+  }
+
   // Just record the order in which threads locks the mutex.
   bool characterizing = true;
 
-  // Order recorded on characterization pass.
-  std::vector<std::thread::id> _threads;
+  // Order recorded during characterization pass.
+  std::vector<std::thread::id> recorded;
 
-  // Permutation of the characterized order for the current pass.
-  std::vector<std::thread::id> _permutation;
+  // Current permutation of the characterized order for the current pass.
+  std::vector<std::thread::id> permutation;
 
   // Thread allowed to acquire the next lock.
   struct {
