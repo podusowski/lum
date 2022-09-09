@@ -1,3 +1,4 @@
+#include "lum/log.hpp"
 #include "lum/lum.hpp"
 #include <cassert>
 #include <mutex>
@@ -11,13 +12,13 @@ void test(lum::mutator &mutator, std::set<int> &values) {
 
   std::thread t{[&] {
     std::unique_lock<lum::mutex> lock{mutex};
-    std::cerr << "writing new value" << std::endl;
+    lum::trace{} << "writing new value";
     value = 42;
   }};
 
   {
     std::unique_lock<lum::mutex> lock{mutex};
-    std::cerr << "value: " << value << std::endl;
+    lum::trace{} << "value: " << value;
     values.insert(value);
   }
 
@@ -29,10 +30,10 @@ int main() {
   lum::mutator mutator;
   std::set<int> values;
 
-  for (auto i = 0; i < 10; i++) {
-    std::cerr << "iteration has started" << std::endl;
+  for (auto i = 0; i < 5; i++) {
+    lum::trace{} << "iteration has started";
     test(mutator, values);
-    std::cerr << std::endl;
+    lum::trace{};
     mutator.next();
   }
 

@@ -26,7 +26,7 @@ struct mutator {
     std::next_permutation(std::begin(permutation), std::end(permutation));
     _next.id = std::begin(permutation);
 
-    trace{} << "next permutation:";
+    trace{} << "next permutation prepared:";
     for (const auto id : permutation) {
       trace{} << "  " << id;
     }
@@ -73,8 +73,12 @@ private:
 
     characterizing = false;
     permutation = recorded;
+
     trace{} << "characterization done, " << recorded.size()
-            << " locks recorded.";
+            << " locks recorded:";
+    for (const auto id : permutation) {
+      trace{} << "  " << id;
+    }
   }
 
   // Just record the order in which threads locks the mutex.
