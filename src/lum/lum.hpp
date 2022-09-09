@@ -6,6 +6,7 @@
 #include <cassert>
 #include <condition_variable>
 #include <future>
+#include <ios>
 #include <iostream>
 #include <mutex>
 #include <thread>
@@ -15,7 +16,7 @@ namespace lum {
 
 struct mutator {
   // Initialize next pass.
-  void next() {
+  bool next() {
     try_finishing_characterization_pass();
 
     // Note that when characterizing phase have just ended, this will
@@ -31,6 +32,9 @@ struct mutator {
       trace{} << "  " << id;
     }
     trace{};
+
+    trace{} << "is same: " << std::boolalpha << (permutation == recorded);
+    return !(permutation == recorded);
   }
 
   void wait() {

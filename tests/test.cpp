@@ -30,12 +30,11 @@ int main() {
   lum::mutator mutator;
   std::set<int> values;
 
-  for (auto i = 0; i < 5; i++) {
+  do {
     lum::trace{} << "iteration has started";
     test(mutator, values);
     lum::trace{};
-    mutator.next();
-  }
+  } while (mutator.next());
 
   assert((values == std::set<int>{0, 42}));
 }
