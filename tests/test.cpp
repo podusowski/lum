@@ -5,19 +5,18 @@
 #include <stdexcept>
 #include <thread>
 
-void increment(int &value, lum::mutex &m) {
-  std::unique_lock<lum::mutex> lock{m};
-  std::cerr << "writing new value" << std::endl;
-  value = 42;
-}
-
 void test(lum::mutator &mutator, std::set<int> &values) {
   int value{0};
-  lum::mutex m{mutator};
-  std::thread t{increment, std::ref(value), std::ref(m)};
+  lum::mutex mutex{mutator};
+
+  std::thread t{[&] {
+    std::unique_lock<lum::mutex> lock{mutex};
+    std::cerr << "writing new value" << std::endl;
+    value = 42;
+  }};
 
   {
-    std::unique_lock<lum::mutex> lock{m};
+    std::unique_lock<lum::mutex> lock{mutex};
     std::cerr << "value: " << value << std::endl;
     values.insert(value);
   }
