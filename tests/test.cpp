@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <thread>
 
-void test(lum::mutator &mutator, std::set<int> &values) {
+void test(std::set<int> &values) {
   int value{0};
   lum::mutex mutex;
 
@@ -30,7 +30,7 @@ int main() {
   std::set<int> values;
 
   do {
-    test(mutator, values);
+    test(values);
   } while (mutator.next());
 
   assert((values == std::set<int>{0, 42}));
