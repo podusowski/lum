@@ -6,13 +6,14 @@
 #include <mutex>
 #include <ostream>
 #include <thread>
+#include <utility>
 
 namespace lum::log {
 
 template <class T> struct range_t { const T &value; };
 
 template <class T> std::ostream &operator<<(std::ostream &os, range_t<T> c) {
-  for (auto it = std::cbegin(c.value); it < std::cend(c.value); it++) {
+  for (auto it = std::cbegin(c.value); it != std::cend(c.value); it++) {
     if (it == std::cbegin(c.value))
       os << *it;
     else
@@ -25,6 +26,18 @@ template <class T> std::ostream &operator<<(std::ostream &os, range_t<T> c) {
 template <class T> range_t<T> range(const T &c) {
   // Do we want to use C++17's CTAD instead?
   return range_t<T>{c};
+}
+
+template <class T>
+auto range_or_plain(const T &value)
+    -> decltype(std::declval<std::ostream>() << value, value) {
+  return value;
+}
+
+template <class T>
+auto range_or_plain(const T &value)
+    -> decltype(std::declval<std::ostream>() << range(value), range(value)) {
+  return range(value);
 }
 
 struct trace {

@@ -32,10 +32,10 @@ struct my_supposedly_threadsafe_storage {
 
 private:
   mutable lum::mutex m_for_a;
-  int a;
+  int a{};
 
   mutable lum::mutex m_for_b;
-  int b;
+  int b{};
 };
 
 void test(std::set<std::tuple<int, int>> &values) {
@@ -60,6 +60,14 @@ void test(std::set<std::tuple<int, int>> &values) {
 
   writer.join();
 }
+
+namespace std {
+
+std::ostream &operator<<(std::ostream &os, std::tuple<int, int> value) {
+  return os << '(' << std::get<0>(value) << ", " << std::get<1>(value) << ')';
+}
+
+} // namespace std
 
 int main() {
   // Boilerplate which ought to end up somewhere in the lib itself.
