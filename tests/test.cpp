@@ -8,7 +8,7 @@
 
 void test(lum::mutator &mutator, std::set<int> &values) {
   int value{0};
-  lum::mutex mutex{mutator};
+  lum::mutex mutex;
 
   std::thread t{[&] {
     std::unique_lock<lum::mutex> lock{mutex};
@@ -26,7 +26,7 @@ void test(lum::mutator &mutator, std::set<int> &values) {
 
 int main() {
   // Boilerplate which ought to end up somewhere in the lib itself.
-  lum::mutator mutator;
+  lum::mutator &mutator = lum::global_mutator();
   std::set<int> values;
 
   do {

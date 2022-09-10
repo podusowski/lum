@@ -96,8 +96,13 @@ private:
   } next_thread;
 };
 
+inline mutator &global_mutator() {
+  static mutator m;
+  return m;
+}
+
 struct mutex {
-  mutex(mutator &mut) : _mutator(mut) {}
+  mutex(mutator &mut = global_mutator()) : _mutator(mut) {}
 
   void lock() {
     _mutator.wait();
