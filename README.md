@@ -52,7 +52,7 @@ Limitations and future plans
 ----------------------------
 - Only single multithreading synchronization primitive is supported right now - a mutex.
 - `lum` works only with a single mutex.
-- It's VERY intrusive right now. Not only you have to swap `std::mutex` with `lum::mutex`, but it also has additional constructor parameter. There are couple of ways to solve it though.
+- It's VERY intrusive right now. Not only you have to swap `std::mutex` with `lum::mutex`, ~~but it also has additional constructor parameter~~. There are couple of ways to solve it though.
 
 
 Enabling logging
