@@ -42,12 +42,12 @@ void test(std::set<std::tuple<int, int>> &values) {
   my_supposedly_threadsafe_storage storage;
 
   std::thread writer{[&] {
-    storage.set_a(2);
-    storage.set_b(2);
+    storage.set_a(3);
+    storage.set_b(3);
   }};
 
   auto sum = std::async(std::launch::async,
-                        [&] { return storage.get_a() * storage.get_b(); });
+                        [&] { return storage.get_a() + storage.get_b(); });
 
   auto product = std::async(std::launch::async,
                             [&] { return storage.get_a() * storage.get_b(); });
@@ -78,5 +78,6 @@ int main() {
     test(values);
   } while (mutator.next());
 
-  lum::assert_eq(values, std::set<std::tuple<int, int>>{{0, 42}});
+  lum::assert_eq(values, std::set<std::tuple<int, int>>{
+                             {0, 0}, {3, 0}, {0, 9}, {3, 9}, {6, 0}, {6, 9}});
 }
