@@ -31,12 +31,14 @@ struct mutator {
     log::trace{} << "next permutation: " << log::range(permutation) << "\n";
 
     // Whether we haven't yet reached the point where we started.
-    return !(permutation == recorded);
+    std::unique_lock<std::mutex> lock{recorded.m};
+    return !(permutation == recorded.data);
   }
 
   void wait() {
     if (characterizing) {
-      recorded.push_back(std::this_thread::get_id());
+      std::unique_lock<std::mutex> lock{recorded.m};
+      recorded.data.push_back(std::this_thread::get_id());
       log::trace{} << "characterization phase, skipping waiting";
       return;
     }
@@ -62,7 +64,8 @@ struct mutator {
   }
 
   ~mutator() {
-    log::trace{} << "recorded locking profile: " << log::range(recorded);
+    std::unique_lock<std::mutex> lock{recorded.m};
+    log::trace{} << "recorded locking profile: " << log::range(recorded.data);
   }
 
 private:
@@ -71,9 +74,10 @@ private:
       return;
 
     characterizing = false;
-    permutation = recorded;
+    std::unique_lock<std::mutex> lock{recorded.m};
+    permutation = recorded.data;
 
-    log::trace{} << "characterization done, " << recorded.size()
+    log::trace{} << "characterization done, " << recorded.data.size()
                  << " locks recorded: " << log::range(permutation);
   }
 
@@ -81,7 +85,10 @@ private:
   bool characterizing = true;
 
   // Order recorded during characterization pass.
-  std::vector<std::thread::id> recorded;
+  struct {
+    std::mutex m;
+    std::vector<std::thread::id> data;
+  } recorded;
 
   // Current permutation of the characterized order for the current pass.
   std::vector<std::thread::id> permutation;
