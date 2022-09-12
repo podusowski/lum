@@ -50,8 +50,9 @@ value: 42
 
 Limitations and future plans
 ----------------------------
-- Only single multithreading synchronization primitive is supported right now - a mutex.
-- `lum` works only with a single mutex.
+- Only single multithreading synchronization primitive is supported right now - a mutex. It can't test for example lock-free algorithms, nor ones using `std::conditional_variable` or other primitives.
+- ~~`lum` works only with a single mutex.~~
+- It does simple permutations of threads that are allowed to take the ownership of the mutexes. This potentially can lead to deadlocks.
 - It's VERY intrusive right now. Not only you have to swap `std::mutex` with `lum::mutex`, ~~but it also has additional constructor parameter~~. There are couple of ways to solve it though.
 
 
